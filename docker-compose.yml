@@ -34,24 +34,24 @@ x-volumes:
   # - ./config.py:/taiga-back/settings/config.py
 
 services:
-  taiga-db:
-    image: postgres:12.3
-    environment:
-      POSTGRES_DB: "taiga"
-      POSTGRES_USER: "${POSTGRES_USER}"
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 2s
-      timeout: 15s
-      retries: 5
-      start_period: 3s
-    volumes:
-      - taiga-db-data:/var/lib/postgresql/data
-    networks:
-      - taiga
+#  taiga-db:
+#    image: postgres:12.3
+#    environment:
+#      POSTGRES_DB: "taiga"
+#      POSTGRES_USER: "${POSTGRES_USER}"
+#      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+#    ports:
+#      - "5432:5432"
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+#      interval: 2s
+#      timeout: 15s
+#      retries: 5
+#      start_period: 3s
+#    volumes:
+#      - taiga-db-data:/var/lib/postgresql/data
+#    networks:
+#      - taiga
 
   taiga-back:
     image: taigaio/taiga-back:latest
@@ -60,8 +60,8 @@ services:
     networks:
       - taiga
     depends_on:
-      taiga-db:
-        condition: service_healthy
+#      taiga-db:
+#        condition: service_healthy
       taiga-events-rabbitmq:
         condition: service_healthy
       taiga-async-rabbitmq:
@@ -75,8 +75,8 @@ services:
     networks:
       - taiga
     depends_on:
-      taiga-db:
-        condition: service_healthy
+#      taiga-db:
+#        condition: service_healthy
       taiga-events-rabbitmq:
         condition: service_healthy
       taiga-async-rabbitmq:
@@ -169,7 +169,7 @@ services:
 volumes:
   taiga-static-data:
   taiga-media-data:
-  taiga-db-data:
+#  taiga-db-data:
   taiga-async-rabbitmq-data:
   taiga-events-rabbitmq-data:
 
