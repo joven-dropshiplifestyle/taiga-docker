@@ -15,6 +15,7 @@ x-volumes:
   &default-back-volumes
   - taiga-static-data:/taiga-back/static
   - taiga-media-data:/taiga-back/media
+  # DISABLED: Since we are use external database (Disabled for Dev Environment)
   # - ./config.py:/taiga-back/settings/config.py
 
 services:
