@@ -165,6 +165,32 @@ services:
       - taiga-front
       - taiga-back
       - taiga-events
+      - django
+
+  django:
+    build:
+      context: django
+      dockerfile: Dockerfile
+    ## Library: docker-compose-wait /wait
+    ## it can wait for multiple hosts using WAIT_HOSTS: postgres:5432, mysql:3306, mongo:27017
+    command: >
+      sh -c "/wait &&
+             python manage.py collectstatic --no-input &&
+             python manage.py makemigrations --noinput &&
+             python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8001"
+    volumes:
+    - ./django:/app
+    ports:
+    - "8001:8001"
+    env_file:
+      - django/.env
+    networks:
+      - taiga
+    depends_on:
+      - taiga-db
+    environment:
+      WAIT_HOSTS: taiga-db:5432
 
 volumes:
   taiga-static-data:
@@ -172,6 +198,7 @@ volumes:
   taiga-db-data:
   taiga-async-rabbitmq-data:
   taiga-events-rabbitmq-data:
+  django:
 
 networks:
   taiga:
