@@ -3,5 +3,5 @@ static-data
 .idea/
 .DS_Store
 .env
-
+venv/
 *.env

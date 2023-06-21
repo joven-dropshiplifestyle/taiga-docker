@@ -67,14 +67,10 @@ INSTALLED_APPS = [
     # Django Applications - Domains
     'domain.commons',
     'domain.users',
-    'domain.stores',
-    'domain.products',
+    'domain.taigas',
     # Django Applications - API Endpoints
     'api.authentication',
-    'api.authenticated',
-    'api.user_management',
-    'api.store_management',
-    'api.product_management',
+    'api.private',
     # Library: djangorestframework
     'rest_framework',
     # Library: drf-yasg

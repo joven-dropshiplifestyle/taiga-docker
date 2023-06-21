@@ -43,10 +43,7 @@ urlpatterns = [
 
     # Route to API's
     path('authentication/', include('api.authentication.urls')),
-    path('authenticated/', include('api.authenticated.urls')),
-    path('user-management/', include('api.user_management.urls')),
-    path('store-management/', include('api.store_management.urls')),
-    path('product-management/', include('api.product_management.urls')),
+    path('private/', include('api.private.urls')),
     path('health-check', health_check_view),
 
     # Library: drf-yasg
