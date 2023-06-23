@@ -5,3 +5,7 @@ static-data
 .env
 venv/
 *.env
+
+# Python specific
+__pycache__/
+*.pyc

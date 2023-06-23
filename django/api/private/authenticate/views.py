@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 # Serializers
-from .serializers import AuthCredentialSerializer, ReadAuthCredentialSerializer
+from .serializers import AuthenticationSerializer, AuthenticationResponseSerializer
 
 # Taiga Integration
 from domain.taigas.integrations.integration_auth import fetch_auth_data
@@ -20,18 +20,18 @@ class AuthenticateAPIView(APIView):
 
     @staticmethod
     @swagger_auto_schema(
-        request_body=AuthCredentialSerializer,
+        request_body=AuthenticationSerializer,
         operation_id="authenticate",
-        tags=["private.authenticate"],
+        tags=["private"],
         responses={
-            200: ReadAuthCredentialSerializer()
+            200: AuthenticationResponseSerializer()
         }
     )
     def post(request, *args, **kwargs):
         logger.info(f"authenticated: {request.user}")
 
         # Validate Request Data
-        auth_credential_serializer = AuthCredentialSerializer(data=request.data)
+        auth_credential_serializer = AuthenticationSerializer(data=request.data)
         auth_credential_serializer.is_valid(raise_exception=True)
 
         auth_data = fetch_auth_data(
@@ -39,7 +39,7 @@ class AuthenticateAPIView(APIView):
             auth_credential_serializer.validated_data['password']
         )
 
-        auth_credential_serializer = ReadAuthCredentialSerializer({
+        auth_credential_serializer = AuthenticationResponseSerializer({
             'token': auth_data.auth_token,
             'refresh': auth_data.refresh,
             'user_info': auth_data

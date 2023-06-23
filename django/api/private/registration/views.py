@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 # Serializers
-from .serializers import ReadAccountSerializer, AccountAlreadyExistSerializer, CreateAccountSerializer
+from .serializers import AccountSerializer, ExistingAccountSerializer, NewAccountSerializer
 
 # Taiga Integration
 from domain.taigas.integrations.integration_users import get_users
@@ -29,19 +29,19 @@ class RegistrationAPIView(APIView):
 
     @staticmethod
     @swagger_auto_schema(
-        request_body=CreateAccountSerializer,
+        request_body=NewAccountSerializer,
         operation_id="accounts_create",
         tags=["private.registration"],
         responses={
-            200: ReadAccountSerializer(),
-            409: AccountAlreadyExistSerializer(),
+            200: AccountSerializer(),
+            409: ExistingAccountSerializer(),
         }
     )
     def post(request, *args, **kwargs):
         logger.info(f"authenticated: {request.user}")
 
         # Validate Request Data
-        account_serializer = CreateAccountSerializer(data=request.data)
+        account_serializer = NewAccountSerializer(data=request.data)
         account_serializer.is_valid(raise_exception=True)
 
         # Check if Taiga Username already exist
@@ -51,7 +51,7 @@ class RegistrationAPIView(APIView):
             for user in users
         )
         if user_exists:
-            account_already_exist_serializer = AccountAlreadyExistSerializer({'message': 'Username already exist'})
+            account_already_exist_serializer = ExistingAccountSerializer({'message': 'Username already exist'})
             return Response(
                 account_already_exist_serializer.data,
                 status=status.HTTP_409_CONFLICT
@@ -93,6 +93,6 @@ class RegistrationAPIView(APIView):
         )
 
         # NOTE: Re-serialize to fetch more detailed data
-        account_serializer = ReadAccountSerializer(account)
+        account_serializer = AccountSerializer(account)
         logger.info("response: %s", json.dumps(account_serializer.data, indent=4))
         return Response(account_serializer.data)

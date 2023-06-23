@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class AuthCredentialSerializer(serializers.Serializer): # noqa
+class AuthenticationSerializer(serializers.Serializer): # noqa
 
     class Meta:
         ref_name = "private.authenticate.QuerySerializer"
@@ -13,7 +13,7 @@ class AuthCredentialSerializer(serializers.Serializer): # noqa
     password = serializers.CharField()
 
 
-class ReadUserInfoSerializer(serializers.Serializer): # noqa
+class UserInfoSerializer(serializers.Serializer): # noqa
 
     class Meta:
         ref_name = "private.authenticate.ReadUserInfoSerializer"
@@ -48,11 +48,11 @@ class ReadUserInfoSerializer(serializers.Serializer): # noqa
     auth_token = serializers.CharField()
 
 
-class ReadAuthCredentialSerializer(serializers.Serializer): # noqa
+class AuthenticationResponseSerializer(serializers.Serializer): # noqa
 
     class Meta:
         ref_name = "private.authenticate.ReadAuthCredentialSerializer"
 
-    user_info = ReadUserInfoSerializer()
+    user_info = UserInfoSerializer()
     token = serializers.CharField()
     refresh = serializers.CharField()

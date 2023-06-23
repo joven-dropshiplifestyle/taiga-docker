@@ -7,10 +7,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class ReadAccountSerializer(serializers.ModelSerializer):
+class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
-        ref_name = "private.registration.ReadAccountSerializer"
+        ref_name = "private.registration.AccountSerializer"
         model = Account
         fields = [
             'id',
@@ -24,18 +24,18 @@ class ReadAccountSerializer(serializers.ModelSerializer):
         ]
 
 
-class AccountAlreadyExistSerializer(serializers.Serializer): # noqa
+class ExistingAccountSerializer(serializers.Serializer): # noqa
 
     class Meta:
-        ref_name = "private.registration.AccountAlreadyExistSerializer"
+        ref_name = "private.registration.ExistingAccountSerializer"
 
     message = serializers.CharField()
 
 
-class CreateAccountSerializer(serializers.Serializer): # noqa
+class NewAccountSerializer(serializers.Serializer): # noqa
 
     class Meta:
-        ref_name = "private.registration.CreateAccountSerializer"
+        ref_name = "private.registration.NewAccountSerializer"
 
     username = serializers.CharField()
     email = serializers.EmailField()
