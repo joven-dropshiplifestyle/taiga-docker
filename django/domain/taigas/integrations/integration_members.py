@@ -2,7 +2,7 @@ import requests
 import logging
 import os
 
-from .integration_auth import fetch_auth_data
+from .integration_auth import fetch_root_auth_data
 from .types.MemberData import Member
 
 logger = logging.getLogger(__name__)
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def invite_member(project_id: int, role_id: int, username: str) -> Member:
 
-    auth_data = fetch_auth_data()
+    auth_data = fetch_root_auth_data()
     auth_token = auth_data.auth_token
     base_url = os.environ.get('TAIGA_ENDPOINT', '')
     endpoint = f'/memberships'

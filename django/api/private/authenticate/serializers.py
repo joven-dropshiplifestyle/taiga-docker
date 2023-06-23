@@ -4,12 +4,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class QuerySerializer(serializers.Serializer): # noqa
+class AuthCredentialSerializer(serializers.Serializer): # noqa
 
     class Meta:
         ref_name = "private.authenticate.QuerySerializer"
 
     email = serializers.EmailField()
+    password = serializers.CharField()
 
 
 class ReadUserInfoSerializer(serializers.Serializer): # noqa

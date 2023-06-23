@@ -3,7 +3,7 @@ import requests
 import logging
 from typing import List
 
-from .integration_auth import fetch_auth_data
+from .integration_auth import fetch_root_auth_data
 from .types.UserData import User
 
 logger = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def get_users() -> List[User]:
 
-    auth_data = fetch_auth_data()
+    auth_data = fetch_root_auth_data()
     auth_token = auth_data.auth_token
     base_url = os.environ.get('TAIGA_ENDPOINT', '')
     endpoint = '/users'

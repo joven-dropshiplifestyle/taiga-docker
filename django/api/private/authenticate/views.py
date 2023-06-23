@@ -1,10 +1,8 @@
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 
 # Serializers
-from .serializers import QuerySerializer, ReadAuthCredentialSerializer
+from .serializers import AuthCredentialSerializer, ReadAuthCredentialSerializer
 
 # Taiga Integration
 from domain.taigas.integrations.integration_auth import fetch_auth_data
@@ -20,21 +18,27 @@ logger = logging.getLogger(__name__)
 
 class AuthenticateAPIView(APIView):
 
-    # permission_classes = (IsAuthenticated,)
-
     @staticmethod
     @swagger_auto_schema(
-        query_serializer=QuerySerializer(),
+        request_body=AuthCredentialSerializer,
         operation_id="authenticate",
         tags=["private.authenticate"],
         responses={
             200: ReadAuthCredentialSerializer()
         }
     )
-    def get(request, *args, **kwargs):
+    def post(request, *args, **kwargs):
         logger.info(f"authenticated: {request.user}")
 
-        auth_data = fetch_auth_data()
+        # Validate Request Data
+        auth_credential_serializer = AuthCredentialSerializer(data=request.data)
+        auth_credential_serializer.is_valid(raise_exception=True)
+
+        auth_data = fetch_auth_data(
+            auth_credential_serializer.validated_data['email'],
+            auth_credential_serializer.validated_data['password']
+        )
+
         auth_credential_serializer = ReadAuthCredentialSerializer({
             'token': auth_data.auth_token,
             'refresh': auth_data.refresh,

@@ -4,14 +4,14 @@ import logging
 import json
 import os
 
-from .integration_auth import fetch_auth_data
+from .integration_auth import fetch_root_auth_data
 from .types.RoleData import Role
 
 logger = logging.getLogger(__name__)
 
 
 def create_student_role(project_id: int) -> Role:
-    auth_data = fetch_auth_data()
+    auth_data = fetch_root_auth_data()
     auth_token = auth_data.auth_token
     base_url = os.environ.get('TAIGA_ENDPOINT', '')
     endpoint = '/roles'
@@ -43,7 +43,7 @@ def create_student_role(project_id: int) -> Role:
 
 
 def create_moderator_role(project_id: int) -> Role:
-    auth_data = fetch_auth_data()
+    auth_data = fetch_root_auth_data()
     auth_token = auth_data.auth_token
     base_url = os.environ.get('TAIGA_ENDPOINT', '')
     endpoint = '/roles'

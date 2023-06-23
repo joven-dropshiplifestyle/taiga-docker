@@ -2,7 +2,7 @@ import os
 import requests
 import logging
 
-from .integration_auth import fetch_auth_data
+from .integration_auth import fetch_root_auth_data
 from .types.ProjectData import Project
 
 logger = logging.getLogger(__name__)
@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def create_project(project_name: str, project_description: str) -> Project:
 
-    auth_data = fetch_auth_data()
+    auth_data = fetch_root_auth_data()
     auth_token = auth_data.auth_token
     base_url = os.environ.get('TAIGA_ENDPOINT', '')
     endpoint = '/projects'
