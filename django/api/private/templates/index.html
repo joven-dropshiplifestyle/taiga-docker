@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Request</title>
+</head>
+<body>
+    <script>
+        fetch('http://localhost:9000/django/private/authenticate', {
+            method: 'GET', // or 'POST'
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            localStorage.setItem('userInfo', JSON.stringify(data.user_info));
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('refresh', data.refresh);
+
+            // After storing data in local storage, redirect to the new URL
+            window.location.href = 'http://localhost:9000/user-settings/user-change-password';
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    </script>
+</body>
+</html>

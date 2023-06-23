@@ -1,25 +1,24 @@
-import os
 import requests
 import logging
+import os
 
 from .integration_auth import fetch_auth_data
-from .types.ProjectData import Project
+from .types.MemberData import Member
 
 logger = logging.getLogger(__name__)
 
 
-def create_project(project_name: str, project_description: str) -> Project:
+def invite_member(project_id: int, role_id: int, username: str) -> Member:
 
     auth_data = fetch_auth_data()
     auth_token = auth_data.auth_token
     base_url = os.environ.get('TAIGA_ENDPOINT', '')
-    endpoint = '/projects'
+    endpoint = f'/memberships'
     url = f"{base_url}{endpoint}"
     data = {
-        "name": project_name,
-        "description": project_description,
-        "is_private": True,
-        "creation_template": os.environ.get('TAIGA_PROJECT_TEMPLATE', '2')
+        "project": project_id,
+        "role": role_id,
+        "username": username
     }
     headers = {
         'Content-Type': 'application/json',
@@ -30,9 +29,9 @@ def create_project(project_name: str, project_description: str) -> Project:
     print(response.text)
     if response.status_code == 201:
         response_json = response.json()
-        project_data = Project.from_dict(response_json)
+        member_data = Member.from_dict(response_json)
         logger.info(response_json)
-        return project_data
+        return member_data
     else:
-        logger.error(f"Failed to create project, status code: {response.status_code}")
-        raise Exception("Failed to create project")
+        logger.error(f"Failed to invite member, status code: {response.status_code}")
+        raise Exception("Failed to invite member")

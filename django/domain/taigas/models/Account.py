@@ -15,7 +15,7 @@ class Account(BaseModel):
     project_id = models.IntegerField()
     project_name = models.CharField(max_length=100)
     project_slug = models.SlugField(max_length=100)
-    project_description = models.CharField(max_length=250)
+    project_description = models.CharField(max_length=1000)
 
     class Meta:
         ordering = ['id']
