@@ -21,7 +21,7 @@
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(bodyData) // include email and password in the body
+            body: JSON.stringify(bodyData)
         })
         .then(response => {
             if (response.ok) {
@@ -32,11 +32,11 @@
         })
         .then(data => {
             localStorage.setItem('userInfo', JSON.stringify(data.user_info));
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('refresh', data.refresh);
+            localStorage.setItem('token', `"${data.token}"`);
+            localStorage.setItem('refresh', `"${data.refresh}"`);
 
             // After storing data in local storage, redirect to the new URL
-            window.location.href = '/user-settings/user-change-password';
+            window.location.href = '/';
         })
         .catch((error) => {
             console.error('Error:', error);
