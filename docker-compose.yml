@@ -189,8 +189,6 @@ services:
       - django/.env
     networks:
       - taiga
-    depends_on:
-      - taiga-db
 
 volumes:
   taiga-static-data:
