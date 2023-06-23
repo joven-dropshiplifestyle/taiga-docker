@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class RegistrationAPIView(APIView):
 
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     @staticmethod
     @swagger_auto_schema(
