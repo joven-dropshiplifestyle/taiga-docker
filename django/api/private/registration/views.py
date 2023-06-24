@@ -1,3 +1,6 @@
+from typing import Any, List, Tuple, Dict
+
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -37,8 +40,8 @@ class RegistrationAPIView(APIView):
             409: ExistingAccountSerializer(),
         }
     )
-    def post(request, *args, **kwargs):
-        logger.info(f"authenticated: {request.user}")
+    def post(request: Request, *args: Tuple[Any], **kwargs: Dict[str, Any]) -> Response:
+        logger.info(f"Authenticated user: {request.user}")
 
         # Validate Request Data
         account_serializer = NewAccountSerializer(data=request.data)

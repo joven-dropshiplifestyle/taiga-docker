@@ -1,3 +1,6 @@
+from typing import Any, List, Tuple, Dict
+
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -22,13 +25,13 @@ class AuthenticateAPIView(APIView):
     @swagger_auto_schema(
         request_body=AuthenticationSerializer,
         operation_id="authenticate",
-        tags=["private"],
+        tags=["private.authenticate"],
         responses={
             200: AuthenticationResponseSerializer()
         }
     )
-    def post(request, *args, **kwargs):
-        logger.info(f"authenticated: {request.user}")
+    def post(request: Request, *args: Tuple[Any], **kwargs: Dict[str, Any]) -> Response:
+        logger.info(f"Authenticated user: {request.user}")
 
         # Validate Request Data
         auth_credential_serializer = AuthenticationSerializer(data=request.data)
