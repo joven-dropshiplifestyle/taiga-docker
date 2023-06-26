@@ -16,3 +16,4 @@ __pycache__/
 *.so
 *.egg
 *.egg-info/
+*.cpython-38.pyc

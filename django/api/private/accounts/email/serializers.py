@@ -30,5 +30,5 @@ class ReadAccountSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_redirect_url(obj):
-        redirect_url = os.getenv("REDIRECT_URL")
+        redirect_url = os.getenv("TAIGA_REDIRECT_URL")
         return f"{redirect_url}/?email={obj.email}&password={obj.password}"
