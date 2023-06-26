@@ -15,6 +15,7 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'email',
+            'full_name',
             'project_id',
             'project_name',
             'project_slug',
@@ -38,6 +39,7 @@ class NewAccountSerializer(serializers.Serializer): # noqa
         ref_name = "private.registration.NewAccountSerializer"
 
     username = serializers.CharField()
+    full_name = serializers.CharField()
     email = serializers.EmailField()
     password = serializers.CharField()
     project_name = serializers.CharField()

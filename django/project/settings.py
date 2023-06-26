@@ -121,6 +121,14 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASS'),
         'HOST': os.environ.get('DB_HOST'),
         'PORT': os.environ.get('DB_PORT')
+    },
+    'taiga_db': {
+        'ENGINE': os.environ.get('TAIGA_DB_ENGINE'),
+        'NAME': os.environ.get('TAIGA_DB_NAME'),
+        'USER': os.environ.get('TAIGA_DB_USER'),
+        'PASSWORD': os.environ.get('TAIGA_DB_PASS'),
+        'HOST': os.environ.get('TAIGA_DB_HOST'),
+        'PORT': os.environ.get('TAIGA_DB_PORT')
     }
 }
 

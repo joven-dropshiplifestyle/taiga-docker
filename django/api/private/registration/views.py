@@ -14,6 +14,10 @@ from domain.taigas.integrations.integration_users import get_users
 from domain.taigas.integrations.integration_projects import create_project
 from domain.taigas.integrations.integration_roles import create_student_role, create_moderator_role
 from domain.taigas.integrations.integration_members import invite_member
+from domain.taigas.integrations.integration_registrations import register_user
+
+# Taiga Database Query
+from domain.taigas.queries.query_members import get_token_by_email
 
 # Model Services
 from domain.taigas.services.service_Account import create_account
@@ -82,11 +86,24 @@ class RegistrationAPIView(APIView):
         # List of Moderator ID
         # moderator_members = bulk_invite_member(moderator_ids,  moderator_role.id, project.id)
 
-        # TODO: Access Database to get the Invitation Code
-        # TODO: Based on the Invitation code automate the registration
+        # Get the Token Directly from Taiga Database and use in on the Registration
+        member_token = get_token_by_email(email=account_serializer.validated_data['email'])
+        logger.info(f"member_token {member_token}")
 
+        # Register the User on Taiga
+        user = register_user(
+            token=member_token,
+            username=account_serializer.validated_data['username'],
+            email=account_serializer.validated_data['email'],
+            full_name=account_serializer.validated_data['full_name'],
+            password=account_serializer.validated_data['password']
+        )
+        logger.info(f"registered user: {user}")
+
+        # Save Record to Django Account Table
         account = create_account(
             username=account_serializer.validated_data['username'],
+            full_name=account_serializer.validated_data['full_name'],
             email=account_serializer.validated_data['email'],
             password=account_serializer.validated_data['password'],
             project_id=project.id,
