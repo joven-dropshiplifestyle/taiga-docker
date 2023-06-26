@@ -5,11 +5,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 # Serializers
-from .serializers import AuthenticationSerializer, AuthenticationResponseSerializer
+from .serializers import AuthenticationSerializer, AuthenticationResponseSerializer, ReadAccountSerializer
 
 # Taiga Integration
 from domain.taigas.integrations.integration_auth import fetch_auth_data
 
+# Services
+from domain.taigas.services.service_Account import get_account_by_email
 
 # Library: drf-yasg
 from drf_yasg.utils import swagger_auto_schema
@@ -42,10 +44,13 @@ class AuthenticateAPIView(APIView):
             auth_credential_serializer.validated_data['password']
         )
 
+        account = get_account_by_email(auth_data.email)
+
         auth_credential_serializer = AuthenticationResponseSerializer({
             'token': auth_data.auth_token,
             'refresh': auth_data.refresh,
-            'user_info': auth_data
+            'user_info': auth_data,
+            'account': account
         })
 
         return Response(auth_credential_serializer.data)

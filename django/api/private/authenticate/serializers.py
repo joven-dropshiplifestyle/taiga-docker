@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+# Models
+from domain.taigas.models.Account import Account
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -48,6 +51,20 @@ class UserInfoSerializer(serializers.Serializer): # noqa
     auth_token = serializers.CharField()
 
 
+class ReadAccountSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        ref_name = "private.authenticate.email.ReadAccountSerializer"
+        model = Account
+        fields = [
+            'project_id',
+            'project_name',
+            'project_slug',
+            'project_description'
+        ]
+
+
+
 class AuthenticationResponseSerializer(serializers.Serializer): # noqa
 
     class Meta:
@@ -56,3 +73,4 @@ class AuthenticationResponseSerializer(serializers.Serializer): # noqa
     user_info = UserInfoSerializer()
     token = serializers.CharField()
     refresh = serializers.CharField()
+    account = ReadAccountSerializer()

@@ -36,7 +36,8 @@
             localStorage.setItem('refresh', `"${data.refresh}"`);
 
             // After storing data in local storage, redirect to the new URL
-            window.location.href = '/';
+            const projectSlug = data.account.project_slug;
+            window.location.href = `/project/${projectSlug}/kanban`;
         })
         .catch((error) => {
             console.error('Error:', error);
