@@ -75,6 +75,8 @@ INSTALLED_APPS = [
     'rest_framework',
     # Library: drf-yasg
     'drf_yasg',
+    # Library: django-cors-headers
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +89,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Library: django-log-request-id
     'log_request_id.middleware.RequestIDMiddleware',
+    # Library: django-cors-headers
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -263,3 +268,6 @@ SWAGGER_SETTINGS = {
         }
     }
 }
+
+# Library: django-cors-headers
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")
