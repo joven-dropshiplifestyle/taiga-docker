@@ -2,8 +2,22 @@
 <html>
 <head>
     <title>API Request</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <style>
+        #loading {
+            display: none;
+        }
+    </style>
 </head>
 <body>
+    <div id="loading" class="d-flex justify-content-center align-items-center" style="height: 100vh; flex-direction: column;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+        <p id="status-text">Please wait...</p>
+    </div>
+
     <script>
         // Get email and password from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -16,6 +30,11 @@
             password: password
         };
 
+        // Show the loading spinner
+        const loadingElement = document.getElementById('loading');
+        const statusText = document.getElementById('status-text');
+        loadingElement.style.display = 'flex';
+
         fetch('/django/private/authenticate', {
             method: 'POST',
             headers: {
@@ -24,6 +43,8 @@
             body: JSON.stringify(bodyData)
         })
         .then(response => {
+            statusText.textContent = 'Authenticating...';
+
             if (response.ok) {
                 return response.json();
             } else {
@@ -31,6 +52,8 @@
             }
         })
         .then(data => {
+            statusText.textContent = 'Redirecting...';
+
             localStorage.setItem('userInfo', JSON.stringify(data.user_info));
             localStorage.setItem('token', `"${data.token}"`);
             localStorage.setItem('refresh', `"${data.refresh}"`);
@@ -40,6 +63,9 @@
             window.location.href = `/project/${projectSlug}/kanban`;
         })
         .catch((error) => {
+            // Hide the loading spinner
+            loadingElement.style.display = 'none';
+
             console.error('Error:', error);
         });
     </script>
