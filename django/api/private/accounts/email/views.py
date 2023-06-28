@@ -3,7 +3,6 @@ from typing import Optional
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 
 # Serializers
 from .serializers import ReadAccountSerializer
@@ -13,9 +12,6 @@ from domain.taigas.services.service_Account import get_account_by_email
 
 # Permission
 from domain.users.permissions.permission_header import HeaderKeyPermission
-
-# Django Shortcuts
-from django.http import Http404
 
 # Library: drf-yasg
 from drf_yasg.utils import swagger_auto_schema
@@ -51,6 +47,7 @@ class AccountEmailAPIView(APIView):
         logger.info(f"authenticated: {request.user}")
         account = get_account_by_email(email_id)
         if account is None:
-            raise Http404
+            data = {"message": "User not found."}
+            return Response({"success": False, "data": data})
         account_serializer = ReadAccountSerializer(account)
         return Response(account_serializer.data)
