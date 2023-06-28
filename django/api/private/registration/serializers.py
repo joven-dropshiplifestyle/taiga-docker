@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+# Validators
+from django.core.validators import RegexValidator
+
 # Models
 from domain.taigas.models import Account
 
@@ -15,7 +18,8 @@ class AccountSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'email',
-            'full_name',
+            'first_name',
+            'last_name',
             'project_id',
             'project_name',
             'project_slug',
@@ -34,12 +38,20 @@ class ExistingAccountSerializer(serializers.Serializer): # noqa
 
 
 class NewAccountSerializer(serializers.Serializer): # noqa
-
     class Meta:
         ref_name = "private.registration.NewAccountSerializer"
 
-    username = serializers.CharField()
-    full_name = serializers.CharField()
+    username = serializers.CharField(
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.-]{1,255}$',
+                message="Required. 255 characters or fewer. Letters, numbers and ./-/_ characters.",
+                code='invalid_username'
+            ),
+        ],
+    )
+    first_name = serializers.CharField()
+    last_name = serializers.CharField(required=False)
     email = serializers.EmailField()
     password = serializers.CharField()
     project_name = serializers.CharField()

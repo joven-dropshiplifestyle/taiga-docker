@@ -36,9 +36,6 @@ class AccountSerializer(serializers.ModelSerializer):
 
 class ReadAccountSerializer(serializers.Serializer): # noqa
 
-    class Meta:
-        ref_name = "private.accounts.email.ReadAccountSerializer"
-
     success = serializers.BooleanField(default=True)
-    data = AccountSerializer()
+    data = AccountSerializer(source='*')
 

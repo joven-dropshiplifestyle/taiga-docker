@@ -22,20 +22,33 @@ from domain.taigas.queries.query_members import get_token_by_email
 # Model Services
 from domain.taigas.services.service_Account import create_account
 
+# Permission
+from domain.users.permissions.permission_header import HeaderKeyPermission
+
 # Library: drf-yasg
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 import json
 import logging
+
 logger = logging.getLogger(__name__)
 
 
 class RegistrationAPIView(APIView):
-
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (HeaderKeyPermission,)
 
     @staticmethod
     @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'X-SPECIAL-KEY',
+                openapi.IN_HEADER,
+                description="special key to access this API",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
         request_body=NewAccountSerializer,
         operation_id="accounts_create",
         tags=["private.registration"],
@@ -91,11 +104,17 @@ class RegistrationAPIView(APIView):
         logger.info(f"member_token {member_token}")
 
         # Register the User on Taiga
+
+        # Combined First name and Last name from request Body to create a full name because Taiga only accept Full Name
+        # on the registration
+        first_name = account_serializer.validated_data['first_name']
+        last_name = account_serializer.validated_data.get('last_name', '')
+
         user = register_user(
             token=member_token,
             username=account_serializer.validated_data['username'],
             email=account_serializer.validated_data['email'],
-            full_name=account_serializer.validated_data['full_name'],
+            full_name=f"{first_name} {last_name}",
             password=account_serializer.validated_data['password']
         )
         logger.info(f"registered user: {user}")
@@ -103,7 +122,9 @@ class RegistrationAPIView(APIView):
         # Save Record to Django Account Table
         account = create_account(
             username=account_serializer.validated_data['username'],
-            full_name=account_serializer.validated_data['full_name'],
+            first_name=account_serializer.validated_data['first_name'],
+            # Since last name is not require on the request body we need to handle it
+            last_name=account_serializer.validated_data.get('last_name', ''),
             email=account_serializer.validated_data['email'],
             password=account_serializer.validated_data['password'],
             project_id=project.id,

@@ -10,7 +10,8 @@ class Account(BaseModel):
 
     id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=100, unique=True)
-    full_name = models.CharField(max_length=100, null=True)
+    first_name = models.CharField(max_length=100, null=True)
+    last_name = models.CharField(max_length=100, null=True)
     email = models.EmailField(max_length=100, unique=True)
     password = models.CharField(max_length=100)
     project_id = models.IntegerField()

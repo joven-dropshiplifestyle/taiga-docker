@@ -38,7 +38,8 @@ def delete_account(account: Account) -> Account:
 
 def create_account(
         username: str,
-        full_name: str,
+        first_name: str,
+        last_name: str,
         email: str,
         password: str,
         project_id: int,
@@ -49,7 +50,8 @@ def create_account(
 
     account = Account.objects.create(
         username=username,
-        full_name=full_name,
+        first_name=first_name,
+        last_name=last_name,
         email=email,
         password=password,
         project_id=project_id,
@@ -67,6 +69,8 @@ def create_account(
 
 def update_account(
         account: Account,
+        first_name: str,
+        last_name: str,
         email: str,
         password: str,
         project_id: str,
@@ -74,6 +78,8 @@ def update_account(
         project_slug: str,
         project_description: str
 ) -> Account:
+    account.first_name = first_name
+    account.last_name = last_name
     account.email = email
     account.password = password
     account.project_id = project_id
