@@ -1,19 +1,18 @@
-from typing import Any, List, Tuple, Dict
+from typing import Any, Tuple, Dict
 
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 
 # Serializers
 from .serializers import AccountSerializer, ExistingAccountSerializer, NewAccountSerializer
 
 # Taiga Integration
 from domain.taigas.integrations.integration_users import get_users
-from domain.taigas.integrations.integration_projects import create_project
+from domain.taigas.integrations.integration_projects import duplicate_template_project
 from domain.taigas.integrations.integration_roles import create_student_role, create_moderator_role
-from domain.taigas.integrations.integration_members import invite_member
+from domain.taigas.integrations.integration_members import invite_member, get_template_users_id
 from domain.taigas.integrations.integration_registrations import register_user
 
 # Taiga Database Query
@@ -77,27 +76,29 @@ class RegistrationAPIView(APIView):
                 status=status.HTTP_409_CONFLICT
             )
 
-        # Create New Project
-        project = create_project(
+        # Get Template Project Users ID's
+        users_id = get_template_users_id()
+
+        # Duplicate Project
+        project = duplicate_template_project(
             project_name=account_serializer.validated_data['project_name'],
-            project_description=account_serializer.validated_data['project_description']
+            project_description=account_serializer.validated_data['project_description'],
+            users_id=users_id
         )
 
-        # Create the Student and Moderator Role
-        student_role = create_student_role(project.id)
-        moderator_role = create_moderator_role(project.id)
+        # "Member" is the Student default Role
+        role_id = None
+        for role in project.roles:
+            if role.name == "Member":
+                role_id = role.id
+                logger.info(f"role_id: {role_id}")
 
         # As per Taiga Docs: username (required): user username or email
         student_member = invite_member(
             project_id=project.id,
-            role_id=student_role.id,
+            role_id=role_id,
             username=account_serializer.validated_data['email']
         )
-
-        # TODO: Invite Bulk Members of Admin
-        # Moderator should already existed on Taiga
-        # List of Moderator ID
-        # moderator_members = bulk_invite_member(moderator_ids,  moderator_role.id, project.id)
 
         # Get the Token Directly from Taiga Database and use in on the Registration
         member_token = get_token_by_email(email=account_serializer.validated_data['email'])
