@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     # Django Applications - API Endpoints
     'api.authentication',
     'api.private',
+    'api.management',
     # Library: djangorestframework
     'rest_framework',
     # Library: drf-yasg

@@ -44,6 +44,7 @@ urlpatterns = [
     # Route to API's
     path('django/authentication/', include('api.authentication.urls')),
     path('django/private/', include('api.private.urls')),
+    path('django/management/', include('api.management.urls')),
     path('django/health-check', health_check_view),
 
     # Library: drf-yasg
