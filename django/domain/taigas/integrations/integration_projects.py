@@ -73,3 +73,28 @@ def duplicate_template_project(project_name: str, project_description: str, user
     else:
         logger.error(f"Failed to create project, status code: {response.status_code}")
         raise Exception("Failed to create project")
+
+
+def get_project_id_by_slug(slug: str) -> int:
+    auth_data = fetch_root_auth_data()
+    auth_token = auth_data.auth_token
+    base_url = os.environ.get('TAIGA_ENDPOINT', '')
+    endpoint = "/projects/by_slug"
+    url = f"{base_url}{endpoint}"
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {auth_token}'
+    }
+    params = {
+        "slug": slug
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code == 200:
+        project_id = response.json()['id']
+        logger.info(f"Project ID retrieved successfully, ID: {project_id}")
+        return project_id
+    else:
+        logger.error(f"Failed to retrieve project ID, status code: {response.status_code}")
+        raise Exception("Failed to retrieve project ID")

@@ -8,7 +8,7 @@ class ProjectSerializer(serializers.Serializer): # noqa
     class Meta:
         ref_name = "management.epics.id.duplicate.ProjectSerializer"
 
-    project_id = serializers.IntegerField()
+    project_slug = serializers.SlugField()
 
 
 

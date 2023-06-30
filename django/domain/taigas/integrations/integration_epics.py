@@ -34,3 +34,33 @@ def create_epic(user_story: UserStory, project_id: int) -> int:
     else:
         logger.error(f"Failed to create epic, status code: {response.status_code}")
         raise Exception("Failed to create epic")
+
+
+def get_epic_id_from_project_template_by_ref_id(ref_id: int) -> int:
+
+    project_template_id = os.environ.get('TAIGA_PROJECT_TEMPLATE', '2')
+
+    auth_data = fetch_root_auth_data()
+    auth_token = auth_data.auth_token
+    base_url = os.environ.get('TAIGA_ENDPOINT', '')
+    endpoint = f"/epics/by_ref"
+    url = f"{base_url}{endpoint}"
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {auth_token}'
+    }
+
+    params = {
+        "ref": ref_id,
+        "project": project_template_id
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code == 200:
+        epic_id = response.json()['id']
+        logger.info(f"Epic ID retrieved successfully, ID: {epic_id}")
+        return epic_id
+    else:
+        logger.error(f"Failed to retrieve epic ID, status code: {response.status_code}")
+        raise Exception("Failed to retrieve epic ID")

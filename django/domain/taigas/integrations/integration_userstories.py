@@ -9,7 +9,7 @@ from .types.UserStoryData import UserStory
 logger = logging.getLogger(__name__)
 
 
-def get_user_stories_by_epic_from_template_project(epic_id: str) -> List[UserStory]:
+def get_user_stories_by_epic_from_template_project(epic_id: int) -> List[UserStory]:
 
     project_template_id = os.environ.get('TAIGA_PROJECT_TEMPLATE', '2')
 
