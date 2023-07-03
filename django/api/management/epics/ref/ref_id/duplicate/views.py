@@ -27,7 +27,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class EpicsIdDuplicateAPIView(APIView):
+class EpicsRefRefIdDuplicateAPIView(APIView):
     permission_classes = (HeaderKeyPermission,)
 
     @staticmethod

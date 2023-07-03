@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .epics.id.duplicate.views import EpicsIdDuplicateAPIView
+from .epics.ref.ref_id.duplicate.views import EpicsRefRefIdDuplicateAPIView
 
 urlpatterns = [
-    path('epics/ref/<int:ref_id>/duplicate', EpicsIdDuplicateAPIView.as_view()),
+    path('epics/ref/<int:ref_id>/duplicate', EpicsRefRefIdDuplicateAPIView.as_view()),
 ]
