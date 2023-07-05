@@ -9,6 +9,30 @@ from .types.ProjectData import Project
 logger = logging.getLogger(__name__)
 
 
+def get_all_projects() -> List[Project]:
+    auth_data = fetch_root_auth_data()
+    auth_token = auth_data.auth_token
+    base_url = os.environ.get('TAIGA_ENDPOINT', '')
+    endpoint = '/projects'
+    url = f"{base_url}{endpoint}"
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {auth_token}'
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        response_json = response.json()
+        projects_data = [Project.from_dict(project) for project in response_json]
+        logger.info(response_json)
+        return projects_data
+    else:
+        logger.error(f"Failed to retrieve projects, status code: {response.status_code}")
+        raise Exception("Failed to retrieve projects")
+
+
 def create_project(project_name: str, project_description: str) -> Project:
 
     auth_data = fetch_root_auth_data()

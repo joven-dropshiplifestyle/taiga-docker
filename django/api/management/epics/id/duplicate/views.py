@@ -27,7 +27,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class EpicsRefRefIdDuplicateAPIView(APIView):
+class EpicsIdDuplicateAPIView(APIView):
     permission_classes = (HeaderKeyPermission,)
 
     @staticmethod
@@ -48,7 +48,7 @@ class EpicsRefRefIdDuplicateAPIView(APIView):
             200: ResponseSerializer(),
         }
     )
-    def post(request: Request, ref_id=None) -> Response:
+    def post(request: Request, epic_id=None) -> Response:
         logger.info(f"Authenticated user: {request.user}")
 
         # Validate Request Data
@@ -56,17 +56,7 @@ class EpicsRefRefIdDuplicateAPIView(APIView):
         project_serializer = ProjectSerializer(data=request.data)
         project_serializer.is_valid(raise_exception=True)
 
-        project_slug = project_serializer.validated_data['project_slug']
-
-        # Get Project ID
-        project_id = get_project_id_by_slug(slug=project_slug)
-        if not project_slug:
-            return Response({"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Get Epic ID
-        epic_id = get_epic_id_from_project_template_by_ref_id(ref_id=ref_id)
-        if not epic_id:
-            return Response({"detail": "Ref not found."}, status=status.HTTP_404_NOT_FOUND)
+        project_id = project_serializer.validated_data['project_id']
 
         # Get Epic User Stories
         user_stories = get_user_stories_by_epic_from_template_project(epic_id=epic_id)

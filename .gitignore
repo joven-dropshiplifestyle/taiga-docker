@@ -17,3 +17,6 @@ __pycache__/
 *.egg
 *.egg-info/
 *.cpython-38.pyc
+
+# Local
+local/

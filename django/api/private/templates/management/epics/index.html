@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <title>Duplicate Epic</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#duplicateButton').click(function (e) {
+                e.preventDefault();
+                $('#loadingSpinner').show(); // Show the loading spinner
+                $('#duplicateButton').prop('disabled', true);  // Disable the button
+
+                var epicId = $('#epicsSelect').val();  // Fetching the selected epic's ID
+
+                $.ajax({
+                    url: '/django/management/epics/' + epicId + '/duplicate',  // Include the epic ID in the URL
+                    type: 'POST',
+                    headers: {
+                        'X-SPECIAL-KEY': 'dr0psh1pl1f3styl3',
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    data: JSON.stringify({
+                        'project_id': $('#projectsSelect').val()
+                    }),
+                    success: function (data) {
+                        console.log(data);
+                        $('#loadingSpinner').hide(); // Hide the loading spinner
+                        $('#messageArea').removeClass('alert-danger').addClass('alert-success').text('Epic duplicated successfully!').show();
+                        $('#duplicateButton').prop('disabled', false);  // Re-enable the button
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        $('#loadingSpinner').hide(); // Hide the loading spinner
+                        $('#messageArea').removeClass('alert-success').addClass('alert-danger').text('Failed to duplicate the Epic!').show();
+                        $('#duplicateButton').prop('disabled', false);  // Re-enable the button
+                    }
+                });
+            });
+        });
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="mt-4 mb-4">Epic Duplicate</h1>
+
+      <!-- Area to display success or error messages -->
+      <div id="messageArea" class="alert" role="alert" style="display: none;"></div>
+
+      <!-- Epics select populated from API response -->
+      <div class="form-group mb-3">
+        <label for="epicsSelect">Select Epic</label>
+        <select class="form-control" id="epicsSelect">
+          {% for epic in epics %}
+            <option value="{{ epic.id }}">{{ epic.subject }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Projects select populated from API response -->
+      <div class="form-group mb-3">
+        <label for="projectsSelect">Duplicate to Project:</label>
+        <select class="form-control" id="projectsSelect">
+          {% for project in projects %}
+            <option value="{{ project.id }}">{{ project.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Button and loading spinner -->
+      <button class="btn btn-success" id="duplicateButton">Duplicate</button>
+      <div id="loadingSpinner" class="spinner-border text-success" style="display: none;"></div>
+    </div>
+  </body>
+</html>
