@@ -56,3 +56,5 @@ class NewAccountSerializer(serializers.Serializer): # noqa
     password = serializers.CharField()
     project_name = serializers.CharField()
     project_description = serializers.CharField()
+    task_title = serializers.CharField(required=False)
+    task_content = serializers.CharField(required=False)

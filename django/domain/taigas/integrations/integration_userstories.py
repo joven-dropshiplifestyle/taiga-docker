@@ -108,3 +108,32 @@ def link_user_stories_to_epic(user_stories_ids: List[int], epic_id: int) -> List
         raise Exception("Failed to link any user stories to the epic")
 
     return linked_user_story_ids
+
+
+def create_user_story(subject: str, description: str, project_id: int) -> int:
+
+    auth_data = fetch_root_auth_data()
+    auth_token = auth_data.auth_token
+    base_url = os.environ.get('TAIGA_ENDPOINT', '')
+    endpoint = "/userstories"
+    url = f"{base_url}{endpoint}"
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {auth_token}'
+    }
+
+    data = {
+        "project": project_id,
+        "subject": subject,
+        "description": description
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+
+    if response.status_code == 201:
+        user_story_id = response.json()['id']
+        logger.info(f"User story created successfully, ID: {user_story_id}")
+        return user_story_id
+    else:
+        logger.error(f"Failed to create user story, status code: {response.status_code}")
+        raise Exception("Failed to create the user story")

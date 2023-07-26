@@ -14,12 +14,13 @@ from domain.taigas.integrations.integration_projects import duplicate_template_p
 from domain.taigas.integrations.integration_roles import create_student_role, create_moderator_role
 from domain.taigas.integrations.integration_members import invite_member, get_template_users_id
 from domain.taigas.integrations.integration_registrations import register_user
+from domain.taigas.integrations.integration_userstories import create_user_story
 
 # Taiga Database Query
 from domain.taigas.queries.query_members import get_token_by_email
 
 # Model Services
-from domain.taigas.services.service_Account import create_account
+from domain.taigas.services.service_Account import create_account, get_account_by_email
 
 # Permission
 from domain.users.permissions.permission_header import HeaderKeyPermission
@@ -63,12 +64,26 @@ class RegistrationAPIView(APIView):
         account_serializer = NewAccountSerializer(data=request.data)
         account_serializer.is_valid(raise_exception=True)
 
+        # Check if already created based on our Django Account Model
+        account = get_account_by_email(account_serializer.validated_data['email'])
+        # If Existing we don't have to create the Taiga Project, we just have to create the task
+        # Reason: because the Student might send the form twice, and we wanted to avoid duplicated projects
+        if account:
+            account_already_exist_serializer = ExistingAccountSerializer({
+                'message': 'This Email had an existing Taiga Project.'
+            })
+            return Response(
+                account_already_exist_serializer.data,
+                status=status.HTTP_409_CONFLICT
+            )
+
         # Check if Taiga Username already exist
         users = get_users()
         user_exists = any(
             user.username == account_serializer.validated_data['username']
             for user in users
         )
+
         if user_exists:
             account_already_exist_serializer = ExistingAccountSerializer({'message': 'Username already exist'})
             return Response(
@@ -119,6 +134,15 @@ class RegistrationAPIView(APIView):
             password=account_serializer.validated_data['password']
         )
         logger.info(f"registered user: {user}")
+
+        # Create the Initial User Story if it's provided on the request
+        if account_serializer.validated_data.get('task_title', ''):
+            created_user_story_id = create_user_story(
+                subject=account_serializer.validated_data['task_title'],
+                description=account_serializer.validated_data.get('task_content', ''),
+                project_id=project.id
+            )
+            logger.info(f"user story created with id: {created_user_story_id}")
 
         # Save Record to Django Account Table
         account = create_account(
