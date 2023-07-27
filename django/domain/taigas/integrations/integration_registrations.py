@@ -2,7 +2,6 @@ import os
 import requests
 import logging
 import json
-from .integration_auth import fetch_root_auth_data
 
 from .types.UserData import User
 

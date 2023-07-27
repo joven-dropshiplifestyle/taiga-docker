@@ -66,12 +66,10 @@ def get_epic_id_from_project_template_by_ref_id(ref_id: int) -> int:
         raise Exception("Failed to retrieve epic ID")
 
 
-def get_epics_from_project_template():
+def get_epics_from_project_template(auth_token: str):
 
     project_template_id = os.environ.get('TAIGA_PROJECT_TEMPLATE', '2')
 
-    auth_data = fetch_root_auth_data()
-    auth_token = auth_data.auth_token
     base_url = os.environ.get('TAIGA_ENDPOINT', '')
     endpoint = f"/epics?project={project_template_id}"
     url = f"{base_url}{endpoint}"

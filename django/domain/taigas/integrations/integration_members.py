@@ -3,16 +3,13 @@ import logging
 import os
 from typing import List
 
-from .integration_auth import fetch_root_auth_data
 from .types.MemberData import Member
 
 logger = logging.getLogger(__name__)
 
 
-def invite_member(project_id: int, role_id: int, username: str) -> Member:
+def invite_member(auth_token: str, project_id: int, role_id: int, username: str) -> Member:
 
-    auth_data = fetch_root_auth_data()
-    auth_token = auth_data.auth_token
     base_url = os.environ.get('TAIGA_ENDPOINT', '')
     endpoint = f'/memberships'
     url = f"{base_url}{endpoint}"
@@ -38,10 +35,8 @@ def invite_member(project_id: int, role_id: int, username: str) -> Member:
         raise Exception("Failed to invite member")
 
 
-def get_template_users_id() -> List[int]:
+def get_template_users_id(auth_token: str) -> List[int]:
     project_template_id = os.environ.get('TAIGA_PROJECT_TEMPLATE', '2')
-    auth_data = fetch_root_auth_data()
-    auth_token = auth_data.auth_token
     base_url = os.environ.get('TAIGA_ENDPOINT', '')
     endpoint = f'/memberships?project={project_template_id}'
     url = f"{base_url}{endpoint}"

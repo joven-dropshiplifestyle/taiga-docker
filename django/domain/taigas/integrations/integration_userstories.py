@@ -110,10 +110,8 @@ def link_user_stories_to_epic(user_stories_ids: List[int], epic_id: int) -> List
     return linked_user_story_ids
 
 
-def create_user_story(subject: str, description: str, project_id: int) -> int:
+def create_user_story(auth_token: str, subject: str, description: str, project_id: int) -> int:
 
-    auth_data = fetch_root_auth_data()
-    auth_token = auth_data.auth_token
     base_url = os.environ.get('TAIGA_ENDPOINT', '')
     endpoint = "/userstories"
     url = f"{base_url}{endpoint}"

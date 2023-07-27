@@ -58,3 +58,4 @@ class NewAccountSerializer(serializers.Serializer): # noqa
     project_description = serializers.CharField()
     task_title = serializers.CharField(required=False)
     task_content = serializers.CharField(required=False)
+    wiki_content = serializers.CharField(required=False)

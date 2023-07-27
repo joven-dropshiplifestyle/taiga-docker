@@ -9,12 +9,13 @@ from rest_framework.views import APIView
 from .serializers import AccountSerializer, ExistingAccountSerializer, NewAccountSerializer
 
 # Taiga Integration
+from domain.taigas.integrations.integration_auth import fetch_root_auth_data
 from domain.taigas.integrations.integration_users import get_users
 from domain.taigas.integrations.integration_projects import duplicate_template_project
-from domain.taigas.integrations.integration_roles import create_student_role, create_moderator_role
 from domain.taigas.integrations.integration_members import invite_member, get_template_users_id
 from domain.taigas.integrations.integration_registrations import register_user
 from domain.taigas.integrations.integration_userstories import create_user_story
+from domain.taigas.integrations.integration_wiki import create_wiki
 
 # Taiga Database Query
 from domain.taigas.queries.query_members import get_token_by_email
@@ -77,8 +78,12 @@ class RegistrationAPIView(APIView):
                 status=status.HTTP_409_CONFLICT
             )
 
+        # Generate SuperUser Account Token in Taiga
+        auth_data = fetch_root_auth_data()
+        auth_token = auth_data.auth_token
+
         # Check if Taiga Username already exist
-        users = get_users()
+        users = get_users(auth_token=auth_token)
         user_exists = any(
             user.username == account_serializer.validated_data['username']
             for user in users
@@ -92,7 +97,7 @@ class RegistrationAPIView(APIView):
             )
 
         # Get Template Project Users ID's
-        users_id = get_template_users_id()
+        users_id = get_template_users_id(auth_token=auth_token)
 
         # Duplicate Project
         project = duplicate_template_project(
@@ -110,6 +115,7 @@ class RegistrationAPIView(APIView):
 
         # As per Taiga Docs: username (required): user username or email
         student_member = invite_member(
+            auth_token=auth_token,
             project_id=project.id,
             role_id=role_id,
             username=account_serializer.validated_data['email']
@@ -138,11 +144,21 @@ class RegistrationAPIView(APIView):
         # Create the Initial User Story if it's provided on the request
         if account_serializer.validated_data.get('task_title', ''):
             created_user_story_id = create_user_story(
+                auth_token=auth_token,
                 subject=account_serializer.validated_data['task_title'],
                 description=account_serializer.validated_data.get('task_content', ''),
                 project_id=project.id
             )
             logger.info(f"user story created with id: {created_user_story_id}")
+
+        # Create Wiki if it's provided on the request
+        if account_serializer.validated_data.get('wiki_content', ''):
+            created_wiki_id = create_wiki(
+                auth_token=auth_token,
+                content=account_serializer.validated_data['wiki_content'],
+                project_id=project.id
+            )
+            logger.info(f"wiki created with id: {created_wiki_id}")
 
         # Save Record to Django Account Table
         account = create_account(
