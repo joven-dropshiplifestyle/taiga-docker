@@ -188,7 +188,8 @@ class RegistrationAPIView(APIView):
                 # Since last name is not require on the request body we need to handle it
                 last_name=account_serializer.validated_data.get('last_name', ''),
                 email=account_serializer.validated_data['email'],
-                password=account_serializer.validated_data['password'],
+                # We cannot set the new password since this account is already existed in Taiga
+                # password=account_serializer.validated_data['password'],
                 project_id=project.id,
                 project_name=project.name,
                 project_slug=project.slug,

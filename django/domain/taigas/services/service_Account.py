@@ -73,7 +73,7 @@ def update_account(
         first_name: str,
         last_name: str,
         email: str,
-        password: str,
+        # password: str,
         project_id: int,
         project_name: str,
         project_slug: str,
@@ -83,7 +83,7 @@ def update_account(
     account.first_name = first_name
     account.last_name = last_name
     account.email = email
-    account.password = password
+    # account.password = password
     account.project_id = project_id
     account.project_name = project_name
     account.project_slug = project_slug
