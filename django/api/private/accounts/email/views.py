@@ -58,12 +58,9 @@ class AccountEmailAPIView(APIView):
         # We are returning this because we want the Student be able to create a new Taiga Project
         # because even though he already had an account his project is already deleted.
         has_active_project = check_email_exists(email_id)
-        if has_active_project is None:
+        if not has_active_project:
             data = {"message": "User exist but has no active Taiga Project"}
             return Response({"success": False, "data": data})
 
         account_serializer = ReadAccountSerializer(account)
-        serialized_data = account_serializer.data
-        serialized_data['data']['has_taiga_project'] = has_active_project
-
-        return Response(serialized_data)
+        return Response(account_serializer.data)
