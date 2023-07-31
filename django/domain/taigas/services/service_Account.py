@@ -69,15 +69,17 @@ def create_account(
 
 def update_account(
         account: Account,
+        username: str,
         first_name: str,
         last_name: str,
         email: str,
         password: str,
-        project_id: str,
+        project_id: int,
         project_name: str,
         project_slug: str,
         project_description: str
 ) -> Account:
+    account.username = username
     account.first_name = first_name
     account.last_name = last_name
     account.email = email

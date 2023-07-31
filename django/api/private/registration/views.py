@@ -21,10 +21,13 @@ from domain.taigas.integrations.integration_wiki import create_wiki
 from domain.taigas.queries.query_members import get_token_by_email
 
 # Model Services
-from domain.taigas.services.service_Account import create_account, get_account_by_email
+from domain.taigas.services.service_Account import create_account, update_account, get_account_by_email
 
 # Permission
 from domain.users.permissions.permission_header import HeaderKeyPermission
+
+# Taiga Database Queries
+from domain.taigas.queries.query_members import check_user_exists, get_user_id_by_email
 
 # Library: drf-yasg
 from drf_yasg.utils import swagger_auto_schema
@@ -67,11 +70,20 @@ class RegistrationAPIView(APIView):
 
         # Check if already created based on our Django Account Model
         account = get_account_by_email(account_serializer.validated_data['email'])
-        # If Existing we don't have to create the Taiga Project, we just have to create the task
-        # Reason: because the Student might send the form twice, and we wanted to avoid duplicated projects
-        if account:
+
+        # Check if Taiga Email already exist
+        taiga_user_id = get_user_id_by_email(account_serializer.validated_data['email'])
+
+        # Check if this Student still has an active Taiga Project
+        # Because if its do not have we want to create a new project for this Student
+        has_taiga_project = False
+        if taiga_user_id:
+            has_taiga_project = check_user_exists(taiga_user_id)
+
+        # If the Student Already Exist in Django and Has Existing taiga Project
+        if has_taiga_project:
             account_already_exist_serializer = ExistingAccountSerializer({
-                'message': 'This Email had an existing Taiga Project.'
+                'message': 'This Email exist and has an active Taiga Project.'
             })
             return Response(
                 account_already_exist_serializer.data,
@@ -82,15 +94,11 @@ class RegistrationAPIView(APIView):
         auth_data = fetch_root_auth_data()
         auth_token = auth_data.auth_token
 
-        # Check if Taiga Username already exist
-        users = get_users(auth_token=auth_token)
-        user_exists = any(
-            user.username == account_serializer.validated_data['username']
-            for user in users
-        )
-
-        if user_exists:
-            account_already_exist_serializer = ExistingAccountSerializer({'message': 'Username already exist'})
+        # If User Exist in Taiga and Has an Active Project
+        if taiga_user_id and has_taiga_project:
+            account_already_exist_serializer = ExistingAccountSerializer(
+                {'message': 'Email already exist and has an active Taiga Project'}
+            )
             return Response(
                 account_already_exist_serializer.data,
                 status=status.HTTP_409_CONFLICT
@@ -113,33 +121,43 @@ class RegistrationAPIView(APIView):
                 role_id = role.id
                 logger.info(f"role_id: {role_id}")
 
-        # As per Taiga Docs: username (required): user username or email
-        student_member = invite_member(
-            auth_token=auth_token,
-            project_id=project.id,
-            role_id=role_id,
-            username=account_serializer.validated_data['email']
-        )
+        # If existing Taiga User lets just invite the User
+        if taiga_user_id:
+            invite_member(
+                auth_token=auth_token,
+                project_id=project.id,
+                role_id=role_id,
+                username=account_serializer.validated_data['email']
+            )
 
-        # Get the Token Directly from Taiga Database and use in on the Registration
-        member_token = get_token_by_email(email=account_serializer.validated_data['email'])
-        logger.info(f"member_token {member_token}")
+        # If Taiga User do not exist based on the email then create an account
+        if not taiga_user_id:
+            # As per Taiga Docs: username (required): user username or email
+            invite_member(
+                auth_token=auth_token,
+                project_id=project.id,
+                role_id=role_id,
+                username=account_serializer.validated_data['email']
+            )
 
-        # Register the User on Taiga
+            # Get the Token Directly from Taiga Database and use in on the Registration
+            member_token = get_token_by_email(email=account_serializer.validated_data['email'])
+            logger.info(f"member_token {member_token}")
 
-        # Combined First name and Last name from request Body to create a full name because Taiga only accept Full Name
-        # on the registration
-        first_name = account_serializer.validated_data['first_name']
-        last_name = account_serializer.validated_data.get('last_name', '')
+            # Register the User on Taiga
+            # Combined First name and Last name from request Body to create a full name because Taiga only accept Name
+            # on the registration
+            first_name = account_serializer.validated_data['first_name']
+            last_name = account_serializer.validated_data.get('last_name', '')
 
-        user = register_user(
-            token=member_token,
-            username=account_serializer.validated_data['username'],
-            email=account_serializer.validated_data['email'],
-            full_name=f"{first_name} {last_name}",
-            password=account_serializer.validated_data['password']
-        )
-        logger.info(f"registered user: {user}")
+            user = register_user(
+                token=member_token,
+                username=account_serializer.validated_data['username'],
+                email=account_serializer.validated_data['email'],
+                full_name=f"{first_name} {last_name}",
+                password=account_serializer.validated_data['password']
+            )
+            logger.info(f"registered user: {user}")
 
         # Create the Initial User Story if it's provided on the request
         if account_serializer.validated_data.get('task_title', ''):
@@ -160,19 +178,36 @@ class RegistrationAPIView(APIView):
             )
             logger.info(f"wiki created with id: {created_wiki_id}")
 
-        # Save Record to Django Account Table
-        account = create_account(
-            username=account_serializer.validated_data['username'],
-            first_name=account_serializer.validated_data['first_name'],
-            # Since last name is not require on the request body we need to handle it
-            last_name=account_serializer.validated_data.get('last_name', ''),
-            email=account_serializer.validated_data['email'],
-            password=account_serializer.validated_data['password'],
-            project_id=project.id,
-            project_name=project.name,
-            project_slug=project.slug,
-            project_description=project.description
-        )
+        # If it has existing Django Account
+        if account:
+            # Save Record to Django Account Table
+            account = update_account(
+                account=account,
+                username=account_serializer.validated_data['username'],
+                first_name=account_serializer.validated_data['first_name'],
+                # Since last name is not require on the request body we need to handle it
+                last_name=account_serializer.validated_data.get('last_name', ''),
+                email=account_serializer.validated_data['email'],
+                password=account_serializer.validated_data['password'],
+                project_id=project.id,
+                project_name=project.name,
+                project_slug=project.slug,
+                project_description=project.description
+            )
+        else:
+            # Save Record to Django Account Table
+            account = create_account(
+                username=account_serializer.validated_data['username'],
+                first_name=account_serializer.validated_data['first_name'],
+                # Since last name is not require on the request body we need to handle it
+                last_name=account_serializer.validated_data.get('last_name', ''),
+                email=account_serializer.validated_data['email'],
+                password=account_serializer.validated_data['password'],
+                project_id=project.id,
+                project_name=project.name,
+                project_slug=project.slug,
+                project_description=project.description
+            )
 
         # NOTE: Re-serialize to fetch more detailed data
         account_serializer = AccountSerializer(account)

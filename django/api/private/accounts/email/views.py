@@ -13,6 +13,9 @@ from domain.taigas.services.service_Account import get_account_by_email
 # Permission
 from domain.users.permissions.permission_header import HeaderKeyPermission
 
+# Taiga DB Queries
+from domain.taigas.queries.query_members import check_email_exists
+
 # Library: drf-yasg
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -46,8 +49,21 @@ class AccountEmailAPIView(APIView):
     def get(request: Request, email_id: Optional[str] = None) -> Response:
         logger.info(f"authenticated: {request.user}")
         account = get_account_by_email(email_id)
+
+        # This means the Student is not yet existing on our Taiga User Database
         if account is None:
             data = {"message": "User not found."}
             return Response({"success": False, "data": data})
+
+        # We are returning this because we want the Student be able to create a new Taiga Project
+        # because even though he already had an account his project is already deleted.
+        has_active_project = check_email_exists(email_id)
+        if has_active_project is None:
+            data = {"message": "User exist but has no active Taiga Project"}
+            return Response({"success": False, "data": data})
+
         account_serializer = ReadAccountSerializer(account)
-        return Response(account_serializer.data)
+        serialized_data = account_serializer.data
+        serialized_data['data']['has_taiga_project'] = has_active_project
+
+        return Response(serialized_data)
