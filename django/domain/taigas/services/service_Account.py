@@ -21,13 +21,15 @@ def get_account_by_id(account_id: int) -> Account:
 
 
 def get_account_by_email(email: str) -> Optional[Account]:
-    try:
-        account = Account.objects.get(email=email)
+    accounts = Account.objects.filter(email=email)
+
+    if accounts.exists():
+        account = accounts.first()
         logger.info(f"{account} fetched")
         return account
-    except Account.DoesNotExist:
-        logger.error(f"Account with email {email} does not exist.")
-        return None
+
+    logger.info(f"No account found with email {email}.")
+    return None
 
 
 def delete_account(account: Account) -> Account:
